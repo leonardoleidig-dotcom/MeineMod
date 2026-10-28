@@ -6,7 +6,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
 import java.util.ArrayDeque;
@@ -16,22 +15,21 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Finds a connected soul-sand/soul-soil shape and activates it when a skull is placed.
- * The current prototype uses the vanilla Wither entity; the shape determines its spawn
- * location and the structure is consumed.
+ * Detects a soul-sand/soul-soil ritual and spawns a chain of Withers for longer builds.
+ * Each segment is a real vanilla Wither, so this is a visual/gameplay prototype rather
+ * than one custom entity with a genuinely extended model.
  */
 public final class ShapeWitherLogic {
     private static final int MAX_COMPONENT_BLOCKS = 512;
     private static final int MAX_SCAN_DISTANCE = 32;
+    private static final int MAX_SEGMENTS = 12;
+    private static final double SEGMENT_SPACING = 2.15;
 
     private ShapeWitherLogic() {}
 
     public static boolean tryActivate(World world, BlockPos skullPos) {
         if (world.isClient || !(world instanceof ServerWorld serverWorld)) return false;
-        if (!world.getBlockState(skullPos).isOf(Blocks.WITHER_SKELETON_SKULL)
-                && !world.getBlockState(skullPos).isOf(Blocks.WITHER_SKELETON_WALL_SKULL)) {
-            return false;
-        }
+        if (!isSkull(world.getBlockState(skullPos))) return false;
 
         BlockPos seed = findAdjacentSoulBlock(world, skullPos);
         if (seed == null) return false;
@@ -43,11 +41,7 @@ public final class ShapeWitherLogic {
         Set<BlockPos> skullSet = new HashSet<>();
         for (BlockPos soul : soulBlocks) {
             for (BlockPos nearby : BlockPos.iterate(soul.add(-1, -1, -1), soul.add(1, 1, 1))) {
-                BlockState state = world.getBlockState(nearby);
-                if (state.isOf(Blocks.WITHER_SKELETON_SKULL)
-                        || state.isOf(Blocks.WITHER_SKELETON_WALL_SKULL)) {
-                    skullSet.add(nearby.toImmutable());
-                }
+                if (isSkull(world.getBlockState(nearby))) skullSet.add(nearby.toImmutable());
             }
         }
         if (!skullSet.contains(skullPos) || skullSet.size() < 3) return false;
@@ -63,18 +57,37 @@ public final class ShapeWitherLogic {
             maxX = Math.max(maxX, pos.getX()); maxY = Math.max(maxY, pos.getY()); maxZ = Math.max(maxZ, pos.getZ());
         }
 
-        // Remove only the blocks that form this connected ritual.
-        for (BlockPos pos : soulSet) world.breakBlock(pos, false);
-        for (BlockPos pos : skullSet) world.breakBlock(pos, false);
-
-        WitherEntity wither = EntityType.WITHER.create(serverWorld);
-        if (wither == null) return true;
         double centerX = (minX + maxX + 1.0) / 2.0;
         double centerY = (minY + maxY + 1.0) / 2.0;
         double centerZ = (minZ + maxZ + 1.0) / 2.0;
-        wither.refreshPositionAndAngles(centerX, centerY, centerZ, 0.0F, 0.0F);
-        serverWorld.spawnEntity(wither);
+        int spanX = maxX - minX + 1;
+        int spanZ = maxZ - minZ + 1;
+        boolean alongX = spanX >= spanZ;
+        int horizontalLength = Math.max(spanX, spanZ);
+        int segments = Math.max(1, Math.min(MAX_SEGMENTS, (horizontalLength + 2) / 3));
+        float yaw = alongX ? 90.0F : 0.0F;
+
+        // Consume the ritual before spawning, so the structure cannot activate twice.
+        for (BlockPos pos : soulSet) world.breakBlock(pos, false);
+        for (BlockPos pos : skullSet) world.breakBlock(pos, false);
+
+        // One vanilla Wither per segment: each contributes its own ribbed body and
+        // three heads, creating a longer multi-headed chain for longer horizontal builds.
+        for (int i = 0; i < segments; i++) {
+            WitherEntity wither = EntityType.WITHER.create(serverWorld);
+            if (wither == null) continue;
+            double offset = (i - (segments - 1) / 2.0) * SEGMENT_SPACING;
+            double x = centerX + (alongX ? offset : 0.0);
+            double z = centerZ + (alongX ? 0.0 : offset);
+            wither.refreshPositionAndAngles(x, centerY, z, yaw, 0.0F);
+            serverWorld.spawnEntity(wither);
+        }
         return true;
+    }
+
+    private static boolean isSkull(BlockState state) {
+        return state.isOf(Blocks.WITHER_SKELETON_SKULL)
+                || state.isOf(Blocks.WITHER_SKELETON_WALL_SKULL);
     }
 
     private static BlockPos findAdjacentSoulBlock(World world, BlockPos skullPos) {
