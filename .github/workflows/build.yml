@@ -1,0 +1,28 @@
+name: Build Meine Mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository herunterladen
+        uses: actions/checkout@v4
+      - name: Java 21 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Gradle installieren
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.12'
+      - name: Mod bauen
+        run: gradle build
+      - name: Mod-JAR speichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: meine-mod
+          path: build/libs/*.jar
