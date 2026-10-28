@@ -3,7 +3,6 @@ package de.meinemod;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -68,7 +67,7 @@ public final class ShapeWitherLogic {
         for (BlockPos pos : soulSet) world.breakBlock(pos, false);
         for (BlockPos pos : skullSet) world.breakBlock(pos, false);
 
-        WitherEntity wither = EntityType.WITHER.create(serverWorld, SpawnReason.TRIGGERED);
+        WitherEntity wither = EntityType.WITHER.create(serverWorld);
         if (wither == null) return true;
         double centerX = (minX + maxX + 1.0) / 2.0;
         double centerY = (minY + maxY + 1.0) / 2.0;
