@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "meine_mod",
+  "version": "${version}",
+  "name": "Meine Mod",
+  "description": "Eine Technik-Mod mit riesigen Minecraft-Bäumen.",
+  "authors": ["Leonardo"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["de.meinemod.MeineMod"],
+    "client": ["de.meinemod.MeineModClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
