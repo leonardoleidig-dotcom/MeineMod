@@ -5,6 +5,12 @@
   "mixins": [
     "WitherSkullBlockMixin"
   ],
+  "client": [
+    "ModelPartAccessor",
+    "WitherEntityRenderStateMixin",
+    "EntityRendererMixin",
+    "WitherEntityModelMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
