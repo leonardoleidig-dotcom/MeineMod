@@ -29,10 +29,10 @@ jobs:
       - name: Build mod
         working-directory: crazy-bike
         run: gradle build --no-daemon
-      - name: Upload mod JAR
+      - name: Upload only the installable mod JAR
         uses: actions/upload-artifact@v4
         with:
           name: CrazyBike-Fabric-1.21.1
-          path: crazy-bike/build/libs/*.jar
+          path: crazy-bike/build/libs/crazy-bike-0.1.0.jar
           if-no-files-found: error
           retention-days: 14
