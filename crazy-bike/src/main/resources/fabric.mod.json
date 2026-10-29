@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "crazy_bike",
+  "version": "${version}",
+  "name": "Crazy Bike",
+  "description": "A crazy rideable bike prototype with turbo boosts for Minecraft 1.21.1.",
+  "authors": ["Leonardo"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["de.crazybike.CrazyBikeMod"],
+    "client": ["de.crazybike.CrazyBikeClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
