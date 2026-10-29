@@ -20,7 +20,6 @@ public class BikeSpawnerItem extends Item {
             CrazyBikeEntity bike = CrazyBikeMod.CRAZY_BIKE.create(world);
             if (bike == null) return TypedActionResult.fail(stack);
             bike.refreshPositionAndAngles(hit.getPos().x, hit.getPos().y + 0.5, hit.getPos().z, user.getYaw(), 0.0f);
-            bike.equipSaddle(null);
             world.spawnEntity(bike);
             if (!user.getAbilities().creativeMode) stack.decrement(1);
         }
