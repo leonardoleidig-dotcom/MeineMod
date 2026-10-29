@@ -2,6 +2,7 @@ name: Build Meine Mod
 
 on:
   push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
