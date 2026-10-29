@@ -16,24 +16,30 @@ public class CrazyBikeMod implements ModInitializer {
     public static final String MOD_ID = "crazy_bike";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static final EntityType<CrazyBikeEntity> CRAZY_BIKE = Registry.register(
-        Registries.ENTITY_TYPE,
-        Identifier.of(MOD_ID, "crazy_bike"),
-        FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, CrazyBikeEntity::new)
-            .dimensions(EntityDimensions.fixed(1.25f, 0.9f))
-            .trackRangeBlocks(10)
-            .trackedUpdateRate(2)
-            .build()
-    );
-
-    public static final Item BIKE_SPAWNER = Registry.register(
-        Registries.ITEM,
-        Identifier.of(MOD_ID, "bike_spawner"),
-        new BikeSpawnerItem(new Item.Settings().maxCount(1))
-    );
+    // Register these during onInitialize, rather than when this class is loaded.
+    public static EntityType<CrazyBikeEntity> CRAZY_BIKE;
+    public static Item BIKE_SPAWNER;
 
     @Override
     public void onInitialize() {
-        LOGGER.info("Crazy Bike geladen! Bike-Spawner: crazy_bike:bike_spawner");
+        CRAZY_BIKE = Registry.register(
+            Registries.ENTITY_TYPE,
+            Identifier.of(MOD_ID, "crazy_bike"),
+            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, CrazyBikeEntity::new)
+                .dimensions(EntityDimensions.fixed(1.25f, 0.9f))
+                .trackRangeBlocks(10)
+                .trackedUpdateRate(2)
+                .build()
+        );
+
+        BIKE_SPAWNER = Registry.register(
+            Registries.ITEM,
+            Identifier.of(MOD_ID, "bike_spawner"),
+            new BikeSpawnerItem(new Item.Settings().maxCount(1))
+        );
+
+        LOGGER.info("Crazy Bike geladen! Registrierte Entität: {}, Bike-Spawner: {}",
+            Registries.ENTITY_TYPE.getId(CRAZY_BIKE),
+            Registries.ITEM.getId(BIKE_SPAWNER));
     }
 }
